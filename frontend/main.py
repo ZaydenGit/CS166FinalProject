@@ -14,12 +14,11 @@ def main():
         clear_screen()
         print("1. Login 2. Register 3.Exit")
         choice = input("Selection an option (1-3): ")
-        match choice:
-            case 1:
-                print("Login placeholder")
-            case 2:
-                print("Register placeholder")   
-            case 3:
+        if choice == "1":
+            print("Login placeholder")
+        elif choice == "2":
+            print("Register placeholder")
+        elif choice == "3":
                 print("Exiting")
                 db.cleanup()
                 sys.exit(0)
