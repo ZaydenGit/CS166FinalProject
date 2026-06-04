@@ -9,7 +9,7 @@ class EmbeddedSQL:
     via the psycopg2 driver.
     """
 
-    def __init__(self, dbname, dbport, user, passwd=""):
+    def __init__(self):
         """
         Creates a new instance of EmbeddedSQL and establishes a physical
         connection to the database.
@@ -33,7 +33,6 @@ class EmbeddedSQL:
             self._connection = psycopg2.connect(
                 database=dbname,
                 user=user,
-                password=passwd,
                 host="localhost",
                 port=dbport
             )
