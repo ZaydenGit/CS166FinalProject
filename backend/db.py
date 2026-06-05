@@ -17,7 +17,6 @@ class EmbeddedSQL:
         :param dbname:  the name of the database
         :param dbport:  the port the PostgreSQL server is running on
         :param user:    the user name used to login to the database
-        :param passwd:  the user login password
         """
         print("Connecting to database...")
 
@@ -64,19 +63,8 @@ class EmbeddedSQL:
         """
         cursor = self._connection.cursor()
         cursor.execute(query, params)
-
         col_names = [desc[0] for desc in cursor.description]
         rows = cursor.fetchall()
-        # row_count = 0
-
-        # # Print header
-        # print("\t".join(col_names))
-
-        # # Print each row
-        # for row in rows:
-        #     print("\t".join(str(val) for val in row))
-        #     row_count += 1
-
         cursor.close()
         return col_names, rows
 

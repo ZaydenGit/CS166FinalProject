@@ -11,7 +11,7 @@ def main():
     db = EmbeddedSQL()
 
     while True:
-        clear_screen()
+        # clear_screen()
         print("1. Login 2. Register 3.Exit")
         choice = input("Selection an option (1-3): ")
         if choice == "1":
