@@ -125,3 +125,10 @@ def render(db, session):
                 else:
                     print("\nInvalid option.")
                     input("Press Enter to continue...")
+        elif choice == "x":
+            print("Logging out...")
+            return {"login": None, "role": None}
+
+        else: 
+            print("Invalid option, please try again.")
+            input("Press Enter to continue...")

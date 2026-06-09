@@ -1,34 +1,3 @@
-# def get_active_auctions(db, limit = 10, offset = 0):
-#     query = """
-#         SELECT a.auction_id, i.item_name, i.category, a.current_highest_bid, a.seller_login
-#         FROM auction a
-#         JOIN item i ON a.item_id = i.item_id
-#         WHERE a.auction_status = 'Active'
-#         ORDER BY a.auction_id ASC
-#         LIMIT %s OFFSET %s
-#     """
-#     try:
-#         col_names, rows = db.execute_query(query, (limit, offset))
-#         return True, (col_names, rows)
-#     except Exception as e:
-#         return False, f"Error: {e}"
-    
-# def search_auctions(db, keyword, limit = 10, offset = 0):
-#     query = """
-#         SELECT a.auction_id, i.item_name, i.category, a.current_highest_bid, a.seller_login
-#         FROM auction a
-#         JOIN item i ON a.item_id = i.item_id
-#         WHERE a.auction_status = 'Active' AND (i.item_name ILIKE %s OR i.description ILIKE %s)
-#         ORDER BY a.auction_id ASC
-#         LIMIT %s OFFSET %s
-#     """
-#     search_term = f"%{keyword}%"
-#     try:
-#         col_names, rows = db.execute_query(query, (search_term, search_term, limit, offset))
-#         return True, (col_names, rows)
-#     except Exception as e:
-#         return False, f"Error: {e}"
-
 def get_auctions(db, keyword = "", limit=10, offset=0, sort_mode='1'):
     order_by = "a.auction_id ASC"
     if sort_mode == '2':
@@ -158,4 +127,48 @@ def get_user_details(db, login):
         else:
             return False, "User not found."
     except Exception as e:
+        return False, f"Error: {e}"
+    
+def get_pending_payments(db, buyer_login):
+    query = """
+        SELECT p.payment_id, i.item_name, p.amount, p.auction_id
+        FROM payment p
+        JOIN auction a ON p.auction_id = a.auction_id
+        JOIN item i ON a.item_id = i.item_id
+        WHERE p.buyer_login = %s AND p.payment_status = 'Pending';
+    """
+    try:
+        _, rows = db.execute_query(query, (buyer_login,))
+        return True, rows
+    except Exception as e:
+        return False, f"Error: {e}"
+
+def process_payment(db, payment_id, buyer_login):
+    try:
+        pay_info = """
+            SELECT p.auction_id, u.address
+            FROM payment p
+            JOIN users u ON p.buyer_login = u.login
+            WHERE p.payment_id = %s AND p.buyer_login = %s AND p.payment_status = 'Pending';
+        """
+        _, rows = db.execute_query(pay_info, (payment_id, buyer_login))
+        if not rows: return False, "Invalid payment ID"
+
+        auction_id, address = rows[0]
+
+        db.execute_update("UPDATE payment SET payment_status = 'Completed' WHERE payment_id = %s;", (payment_id,))
+
+        _, shipment_id_rows = db.execute_query("SELECT COALESCE(MAX(shipment_id), 0) + 1 FROM shipment;")
+        shipment_id = shipment_id_rows[0][0]
+
+        shipment_query = """
+            INSERT INTO shipment (shipment_id, auction_id, address, shipment_status)
+            VALUES (%s, %s, %s, 'Pending');
+        """
+
+        db.execute_update(shipment_query, (shipment_id, auction_id, address))
+
+        return True, "Payment successful"
+    except Exception as e:
+        db._connection.rollback()
         return False, f"Error: {e}"

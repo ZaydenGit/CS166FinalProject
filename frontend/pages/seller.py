@@ -10,6 +10,7 @@ def render(db, session):
         print("1. List an item")
         print("2. Manage active auctions")
         print("3. View closed auctions")
+        print("4. Manage shipments")
         print("x. Logout")
         print("=================================")
 
@@ -49,9 +50,9 @@ def render(db, session):
                     print('-'*50)
                     for row in rows:
                         a_id = row[0]
-                    name = row[1]
-                    highest_bid = float(row[3]) if row[3] is not None else 0.0
-                    print(f"{str(a_id):<5} | {str(name)[:24]:<25} | ${highest_bid:.2f}")
+                        name = row[1]
+                        highest_bid = float(row[3]) if row[3] is not None else 0.0
+                        print(f"{str(a_id):<5} | {str(name)[:24]:<25} | ${highest_bid:.2f}")
                 elif success and not rows:
                     print("You do not have any auctions")
                 else:
@@ -65,7 +66,7 @@ def render(db, session):
                     print(f"1. Close auction\n2. Edit description\nb. Cancel")
                     sub_action = input("Selection option: ").strip()
                     if sub_action == '1':
-                        confirm = input(f"Are you sure you want to close ${action}? (y/n): ").strip().lower()
+                        confirm = input(f"Are you sure you want to close #{action}? (y/n): ").strip().lower()
                         if confirm == 'y':
                             close_success, close_msg = seller_controller.end_auction(db, action, session["login"])
                             print(f"{'Successfully closed auction' if close_success else 'Failed to close auction'} {close_msg}")
@@ -97,6 +98,45 @@ def render(db, session):
                 input("Press Enter to continue...")
             else:
                 print(f"Error: {rows}")
+
+        elif choice == "4":
+            while True:
+                clear_screen()
+                print ("--- Shipments ---")
+                success, rows = seller_controller.get_pending_shipments(db, session["login"])
+                if success and rows:
+                    print(f"{'Shipment ID':<12} | {'Item Name':<20} | {'Status'}")
+                    print("-" * 45)
+                    for row in rows:
+                        s_id, name, address, status, tracking = row
+                        print(f"{str(s_id):<12} | {str(name)[:19]:<20} | {status}")
+                elif success and not rows:
+                    print("No pending shipments.")
+                else:
+                    print(f"Error: {rows}")
+                    
+                print("\n" + "-" * 45)
+                action = input("[shipment ID] Enter Shipment ID to update | b. Go Back: ").strip().lower()
+                
+                if action == 'b':
+                    break
+                elif action.isdigit():
+                    print("\nUpdate Status to:")
+                    print("1. Shipped")
+                    print("2. Delivered")
+                    stat_choice = input("Select status (1-2) or press Enter to cancel: ").strip()
+                    
+                    if stat_choice in ['1', '2']:
+                        new_status = 'Shipped' if stat_choice == '1' else 'Delivered'
+                        tracking = input("Enter tracking number (optional), or press Enter to skip: ").strip()
+                        track_val = tracking if tracking else None
+                        
+                        update_success, update_msg = seller_controller.update_shipment(db, action, session["login"], new_status, track_val)
+                        print(f"\n[{'Success' if update_success else 'Failed'}] {update_msg}")
+                        input("Press Enter to continue...")
+                else:
+                    print("\nInvalid option.")
+                    input("Press Enter to continue...")
 
         elif choice == "x":
             print("Logging out...")

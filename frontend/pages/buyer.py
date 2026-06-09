@@ -147,6 +147,7 @@ def render(db, session):
         print("1. View all or search active auctions")
         print("2. View auction by ID")
         print("3. Edit profile")
+        print("4. View cart / payments")
         print("x. Logout")
         print("=================================")
 
@@ -198,7 +199,37 @@ def render(db, session):
             )
             print(f"Successfully updated proifle" if update_success else f"Failed to update profile: {msg}")
             input("Press Enter to continue...")
-            
+        
+        elif choice == "4":
+            while True:
+                clear_screen()
+                print('--- Cart / Pending Payments ---')
+                success, rows = buyer_controller.get_pending_payments(db, session["login"])
+                if success and rows:
+                    print(f"{'Payment ID':<12} | {'Item Name':<20} | {'Amount Due'}")
+                    print('-'*45)
+                    for row in rows:
+                        p_id, name, amount, _ = row
+                        print(f"{str(p_id):<12} | {str(name)[:19]:<20} | ${float(amount):.2f}")
+                elif success and not rows:
+                    print("You have no pending payments")
+                else:
+                    print(f"Error: {rows}")
+                
+                print("\n" + "-"*45)
+                action = input("[payment ID] Enter payment ID | b. Go back: ").strip().lower()
+
+                if action == "b": break
+                elif action.isdigit():
+                    confirm = input(f"Process payment #{action} (y/n)").strip().lower()
+                    if confirm == "y":
+                        pay_success, pay_msg = buyer_controller.process_payment(db, action, session["login"])
+                        print(f"Successfully paid" if pay_success else f"Failed to pay: {pay_msg}")
+                        input("Press Enter to continue...")
+                else:
+                    print("Invalid option")
+                    input("Press Enter to continue...")
+
         elif choice == "x":
             print("Logging out...")
             return {"login": None, "role": None}
