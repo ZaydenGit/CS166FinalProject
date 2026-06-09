@@ -12,13 +12,15 @@ def view_auction_page(db, session, auction_id):
             return
         a_id, name, desc, cond, highest_bid, status, seller = details
 
-        print("Auction Details")
+        print("--- Auction Details ---")
+        print("="*50)
         print(f"Name: {name}")
         print(f"Condition: {cond}")
         print(f"Status: {status}")
         print(f"Seller: {seller}")
         print(f"\nDescription: {desc}")
         print(f"\nCurrent highest bid: ${highest_bid:.2f}")
+        print("="*50)
 
         if status == "Active":
             print("1. Place a bid")
@@ -54,10 +56,10 @@ def view_auction_page(db, session, auction_id):
             input("Press Enter to continue...")
 
 def browse_auctions_page(db, session):
-
+    clear_screen()
     keyword = input("Enter category or item name to search (or press Enter to view all): ").strip()
 
-    print("\Sort all active auctions by:")
+    print("\nSort all active auctions by:")
     print("1. Auction ID (default)")
     print("2. Price (Low to High)")
     print("3. Price (High to Low)")
