@@ -1,4 +1,4 @@
-# CS166FinalProject
+# CS166 Final Project - Shopping Platform DBMS
 
 Final Project for CS166 @ UCR
 
@@ -44,7 +44,8 @@ see also: `python3 db_test.py`
 
 On first time use, you must register an account. To do this, just follow the on-screen menu.
 
-... (screenshot here... etc) ...
+<img width="438" height="179" alt="image" src="https://github.com/user-attachments/assets/280ce55c-ed04-4fc8-9490-c516688d7363" />
+
 
 From there, you can log in to the program and perform actions as a Buyer (by default).
 
@@ -57,13 +58,17 @@ cs166_psql ${USER}_finalproj_DB < UPDATE users SET role = 'Admin' WHERE login = 
 
 Obviously, replacing "\<username>" with whichever username you chose.
 
-The rest of the program is self-explanatory on how to interface with. Each role has a different view of the program as they have different permissions and actions that they can take.
+The rest of the program is rather self-explanatory on how to interface with. Each role has a different view of the program as they have different permissions and actions that they can take.
 
 # Justifications
 
 Obviously, I can't cover every single design decision that I made while developing, so I will focus on the main ones (that I remember).
 
-The frontend utilizes an approach similar to a state machine. Once a user logs in, their `session["role"]` acts as a token that directs them into a respective dashboard loop until they explicitly log out of the system. As mentioned above, there is no way to change your role inside of the client UNLESS you are an Admin.
+First and foremost, the queries for creating the relations were already provided. I also took the `EmbeddedSQL` class from Lab 6, specifically the `execute_query` and `execute_update` methods. I made these a little more useful by making their return statements return more useful information.
+
+The frontend utilizes an approach similar to a state machine. Once a user logs in, their `session["role"]` acts as a token that directs them into a respective dashboard loop until they explicitly log out of the system. As mentioned above, there is no way to change your role inside of the client _unless_ you are an Admin.
+
+Every SQL query is done inside of the backend files. I probably would have benefitted from breaking up the files even more than I did, because a couple of them got quite long. But, the backend/controllers/ folder contains all the SQL queries and logic that work behind the scenes with the frontend/pages/ files. I specifically made this pretty modular, since I developed the client in a very linear fashion and I wanted to be able to develop one page at a time.
 
 Data displayed in the larger views (such as large lists of items, users) are managed by using pagination, that is, the `LIMIT` and `OFFSET` operators in SQL, to ensure that the ui remains clean enough in this environment. Because I have so much data to work with (see credits), it is not an option to just print everything out.
 
@@ -75,17 +80,41 @@ Pretty much everything in this was designed to be scalable. There are a few exce
 
 Some other optimizations were done. I tried to implement limits in a few places, for example when getting the highest value for an auction (in the context of ending it), the bid history is sorted in descending order (which is already indexed) and we only take the first entry using `LIMIT 1`.
 
+## Buyer View
+This is the default view for the program.  
+<img width="533" height="293" alt="image" src="https://github.com/user-attachments/assets/e35b786c-f360-4fb2-8cbe-8c606f900927" />  
+Buyers can search the database / platform, view active auctions, place bids, edit their own profile, and process pending payments to generate shipments.  
+<img width="508" height="147" alt="image" src="https://github.com/user-attachments/assets/5a6fbfef-72b4-4903-920c-34be0682fe47" />  
+<img width="614" height="283" alt="image" src="https://github.com/user-attachments/assets/51012f41-469a-473e-89a6-1af244845618" />  
+
+## Seller view
+Sellers are the users that can list items as auctions. They can also monitor their own bids, end auctions to declare a winner, and dispatch generated shipments (that have been paid for by a user).  
+<img width="250" height="171" alt="image" src="https://github.com/user-attachments/assets/eb2ccb02-0561-415c-8584-eb653fea4d0f" />  
+<img width="445" height="208" alt="image" src="https://github.com/user-attachments/assets/3e8a8733-f313-4f83-9280-72ba66583856" />  
+
+## Admin View
+Admins manage the platform. They can forcefully delete items/auctions (this delete cascades), they can manage user roles. It was planned that the admin role would be able to view the entire bid history of an auction, but I honestly didn't have time to implement this.  
+<img width="384" height="123" alt="image" src="https://github.com/user-attachments/assets/ff3faa25-eaae-46fc-bcf5-91bd1937d026" />  
+<img width="592" height="297" alt="image" src="https://github.com/user-attachments/assets/574ba6b7-1b4e-42f2-bbef-02005ad8a434" />  
+
+
+
+
 # References & Credits
 
 https://www.psycopg.org/docs/module.html#module-psycopg2  
-https://docs.python.org/3/library/os.html#os.environ
+https://docs.python.org/3/library/os.html#os.environ  
+https://docs.python.org/3/library/datetime.htm  
+https://www.postgresql.org/docs/current/queries-limit.html  
+https://www.postgresql.org/docs/current/ddl-constraints.html  
+
 
 Sample Data CSVs: Hyrum Catanzaro  
 <small style="color: lightgrey">(data generated was distinct from that used in his program, he made a script to generate it)</small>
 
-Lecture slides and lab files
+Lecture slides and lab files  
 
 # Contributions
 
-Zayden Middleton: Planned, designed, coded, and created writeup.
+Zayden Middleton: Planned, designed, and coded project. Created writeup.  
 Neha Lloyd:
