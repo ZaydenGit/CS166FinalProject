@@ -18,7 +18,7 @@ def main():
             print("="*30)
             print("1. Login\n2. Register\n3. Exit")
             print("="*30)
-            choice = input("Selection an option (1-3): ")
+            choice = input("Select an option (1-3): ")
             if choice == "1":
                 session = login.render(db)
             elif choice == "2":
